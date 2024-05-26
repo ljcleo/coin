@@ -1,5 +1,4 @@
 import Coin.CloseD
-import Coin.Util
 
 open AddMonoidHom AddSubgroup Finite Function Set SetLike
 

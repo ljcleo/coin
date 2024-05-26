@@ -7,14 +7,13 @@ variable (f : G ≃+ G)
 
 theorem add_le_card_of_D_chain_adj_ne {k : ℕ}
     (h : ∀ i < k, D_chain f i ≠ D_chain f (i + 1)) :
-    (D_chain f k).carrier.ncard + k ≤ card G := by
+    ncard (D_chain f k : Set G) + k ≤ card G := by
   rw [← Nat.card_eq_fintype_card, ← ncard_univ G]
-  induction' k with _ ih
+  induction' k with n ih
   · exact le_refl _
+  have h' := lt_of_le_of_ne (D_chain_adj_le _ _) (h _ (Nat.lt_succ_self _)).symm
   linarith [
-    ih fun _ hi ↦ h _ (Nat.lt_succ_of_lt hi),
-    subgroup_ncard_lt_ncard_of_lt <|
-    lt_of_le_of_ne (D_chain_adj_le _ _) (h _ (Nat.lt_succ_self _)).symm
+    ih fun _ hi ↦ h _ (Nat.lt_succ_of_lt hi), ncard_lt_ncard h' (toFinite _)
   ]
 
 theorem D_chain_bounded : ∃ i ≤ card G, D_chain f i = D_chain f (i + 1) := by
