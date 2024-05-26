@@ -1,16 +1,8 @@
 import Coin.Common
 
+open AddSubgroup Set SetLike Unique
+
 variable {G : Type*} [Fintype G] [AddCommGroup G]
 
-def Hom_range_back_Hom {H : AddSubgroup G} (hom : H →+ H) :
-    hom.range →+ hom.range.map H.subtype  :=
-  AddMonoidHom.mk'
-  (
-    Set.MapsTo.restrict H.subtype hom.range (hom.range.map H.subtype)
-    fun x _ ↦ by use x
-  )
-  fun _ _ ↦ by ext; rw [
-    AddSubmonoid.coe_add, Set.MapsTo.val_restrict_apply,
-    Set.MapsTo.val_restrict_apply, Set.MapsTo.val_restrict_apply,
-    AddSubmonoid.coe_add, AddSubgroup.coeSubtype, AddSubmonoid.coe_add
-  ]
+theorem subgroup_ncard_lt_ncard_of_lt {H₁ H₂ : AddSubgroup G} (h : H₁ < H₂) :
+    H₁.carrier.ncard < H₂.carrier.ncard := ncard_lt_ncard h (toFinite _)
