@@ -3,12 +3,11 @@ import Coin.CloseF
 open Set SetLike
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
-
 variable (f : G ≃+ G)
 
 def D : G →+ G := AddMonoidHom.mk'
   (fun a ↦ f a - a)
-  (fun _ _ ↦ by dsimp; rw [map_add]; abel)
+  (fun _ _ ↦ by dsimp; rw [map_add, ← sub_sub, add_sub, sub_add_eq_add_sub])
 
 theorem D_f_comm (x : G) : D f (f x) = f (D f x) := by dsimp [D]; rw [map_sub]
 

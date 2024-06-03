@@ -8,10 +8,10 @@ theorem D_core_bot_of_unique_CloseD
     (h : ∀ (H : AddSubgroup G), CloseD f ⊤ H → H = ⊤) : D_core f = ⊥ := by
   contrapose! h
   rcases
-    upward_ssub _ (D_rank _)
+    upward_ssub (D_rank _)
     ⟨
       ⊥, bot_lt_iff_ne_bot.mpr h, bot_CloseF _,
-      bot_CloseD_of_eq _ _ (D_core_eq_D_Subgroup _).symm
+      bot_CloseD_of_eq (D_rank_is_bound f).succ.symm
     ⟩
     with ⟨H, hH, _, hHCD⟩
   exact ⟨H, hHCD, ne_of_lt hH⟩
@@ -20,7 +20,7 @@ theorem unique_CloseD_of_D_core_bot (h : D_core f = ⊥) (H : AddSubgroup G)
     (hCD : CloseD f ⊤ H) : H = ⊤ := by
   contrapose! h
   rcases
-    @downward_ssub _ _ f _ (lt_top_iff_ne_top.mpr h)
+    @downward_ssub _ _ _ _ (lt_top_iff_ne_top.mpr h)
     (CloseF_of_CloseD hCD) hCD (D_rank f)
     with ⟨K, hK, _, _⟩
   exact (ne_of_lt (lt_of_le_of_lt bot_le hK)).symm

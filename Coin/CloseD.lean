@@ -19,10 +19,9 @@ theorem Subgroup_of_CloseD : K ≤ H :=
   fun _ h ↦ (subset_of_subset_of_eq (Subset.refl _) hCD.symm h).right
 
 instance CloseF_of_CloseD : CloseF f K where
-  image_closed := fun x h ↦ calc
-    _ = D f x + x := by dsimp [D]; abel
-    _ ∈ K :=
-      add_mem ((subset_of_subset_of_eq (Subset.refl _) hCD.symm h).left) h
+  image_closed := fun x h ↦
+    (sub_add_cancel (f x) _).symm ▸
+    add_mem ((subset_of_subset_of_eq (Subset.refl _) hCD.symm h).left) h
 
 theorem preimage_close_of_CloseD {a : G} (ha : a ∈ H) (hDfa : (D f) a ∈ K) :
     a ∈ K := by rw [← mem_coe, ← hCD]; exact ⟨hDfa, ha⟩

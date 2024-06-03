@@ -3,7 +3,14 @@ import Coin.DChain
 open AddSubgroup Fintype Set
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
-variable (f : G ≃+ G)
+
+structure isDChainBound (f : G ≃+ G) (i : ℕ) : Prop where
+  pred : D_chain f (i - 1) = D_chain f i → i = 0
+  succ : D_chain f i = D_chain f (i + 1)
+
+section
+
+variable {f : G ≃+ G}
 
 theorem add_le_card_of_D_chain_adj_ne {k : ℕ}
     (h : ∀ i < k, D_chain f i ≠ D_chain f (i + 1)) :
@@ -16,18 +23,71 @@ theorem add_le_card_of_D_chain_adj_ne {k : ℕ}
     ih fun _ hi ↦ h _ (Nat.lt_succ_of_lt hi), ncard_lt_ncard h' (toFinite _)
   ]
 
+theorem D_chain_add_eq_of_eq {i : ℕ} (h : D_chain f i = D_chain f (i + 1))
+    (j : ℕ) : D_chain f (i + j) = D_chain f (i + j + 1) := by
+  induction' j with _ ih
+  · exact h
+  exact congrArg (D_Subgroup f) <| ih
+
+theorem D_chain_bound_exists_of_top_ne_of_bounded (h : ⊤ ≠ D_Subgroup f ⊤)
+    (h' : ∃ i, D_chain f i = D_chain f (i + 1)) :
+    ∃ i, D_chain f (i + 1) < D_chain f i ∧
+    D_chain f (i + 1) = D_chain f (i + 2) := by
+  by_contra! h''
+  have (i : ℕ) : D_chain f (i + 1) < D_chain f i := by
+    induction' i with i ih
+    · exact lt_of_le_of_ne (D_chain_adj_le f _) h.symm
+    exact lt_of_le_of_ne (D_chain_adj_le f _) (h'' _ ih).symm
+  rcases h' with ⟨_, hj⟩; exact ne_of_lt (this _) hj.symm
+
+theorem D_chain_bound_exists_of_bounded
+    (h : ∃ i, D_chain f i = D_chain f (i + 1)) : ∃ i, isDChainBound f i := by
+  by_cases h' : ⊤ = D_Subgroup f ⊤
+  · exact ⟨_, fun _ ↦ rfl, h'⟩
+  rcases D_chain_bound_exists_of_top_ne_of_bounded h' h with ⟨i, h₁, h₂⟩
+  exact ⟨_, fun h'' ↦ by exfalso; exact ne_of_lt h₁ h''.symm, h₂⟩
+
+theorem D_chain_bound_unique {i j : ℕ} (hi : isDChainBound f i)
+    (hj : isDChainBound f j) : i = j := by
+  by_contra! h
+  wlog h' : i < j generalizing i j
+  · push_neg at h'; exact this hj hi h.symm <| lt_of_le_of_ne h' h.symm
+  replace h : j ≠ 0 := ne_zero_of_lt h'
+  exact
+    h <| hj.pred <| Nat.succ_pred h ▸
+    Nat.add_sub_cancel' (Nat.le_pred_of_lt h') ▸
+    D_chain_add_eq_of_eq hi.succ (j - 1 - i)
+
+end
+
+section
+
+variable (f : G ≃+ G)
+
 theorem D_chain_bounded : ∃ i ≤ card G, D_chain f i = D_chain f (i + 1) := by
   by_contra! h
   linarith [
-    add_le_card_of_D_chain_adj_ne f fun _ hi ↦ h _ (Nat.le_of_lt_succ hi)
+    add_le_card_of_D_chain_adj_ne fun _ hi ↦ h _ (Nat.le_of_lt_succ hi)
   ]
 
-noncomputable def D_rank : ℕ :=
-  sInf { i ≤ card G | D_chain f i = D_chain f (i + 1) }
+theorem D_chain_bounded' : ∃ i, D_chain f i = D_chain f (i + 1) := by
+  rcases D_chain_bounded f with ⟨_, _, h⟩; exact ⟨_, h⟩
+
+theorem D_chain_exists_unique_bound : ∃! i, isDChainBound f i := by
+  rcases D_chain_bound_exists_of_bounded <| D_chain_bounded' f with ⟨_, hi⟩
+  exact ExistsUnique.intro _ hi fun _ hj ↦ (D_chain_bound_unique hi hj).symm
+
+noncomputable def D_rank_unique : Unique { a // isDChainBound f a } :=
+  Classical.choice <| (unique_subtype_iff_exists_unique _).mpr <|
+  D_chain_exists_unique_bound _
+
+noncomputable def D_rank : ℕ := (D_rank_unique f).default
+
+theorem D_rank_is_bound : isDChainBound f <| D_rank f :=
+  (D_rank_unique _).toInhabited.default.property
 
 noncomputable def D_core : AddSubgroup G := D_chain f (D_rank f)
 
-instance : CloseF f (D_core f) := D_chain_CloseF _ (D_rank f)
+instance : CloseF f (D_core f) := D_chain_CloseF _ (D_rank _)
 
-theorem D_core_eq_D_Subgroup : D_core f = D_Subgroup f (D_core f) := by
-  rcases Nat.sInf_mem (D_chain_bounded f) with ⟨_, h⟩; exact h
+end
