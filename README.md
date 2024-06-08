@@ -1,3 +1,3 @@
 # Coin
 
-An interesting question about communicative groups and group isomorphisms.
+An interesting question about finite communicative groups and group isomorphisms.
