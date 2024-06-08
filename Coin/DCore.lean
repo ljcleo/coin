@@ -1,6 +1,6 @@
 import Coin.DChain
 
-open AddSubgroup Fintype Set
+open Fintype Set
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
 
@@ -11,17 +11,6 @@ structure isDChainBound (f : G ≃+ G) (i : ℕ) : Prop where
 section
 
 variable {f : G ≃+ G}
-
-theorem add_le_card_of_D_chain_adj_ne {k : ℕ}
-    (h : ∀ i < k, D_chain f i ≠ D_chain f (i + 1)) :
-    ncard (D_chain f k : Set G) + k ≤ card G := by
-  rw [← Nat.card_eq_fintype_card, ← ncard_univ G]
-  induction' k with n ih
-  · exact le_refl _
-  have h' := lt_of_le_of_ne (D_chain_adj_le _ _) (h _ (Nat.lt_succ_self _)).symm
-  linarith [
-    ih fun _ hi ↦ h _ (Nat.lt_succ_of_lt hi), ncard_lt_ncard h' (toFinite _)
-  ]
 
 theorem D_chain_add_eq_of_eq {i : ℕ} (h : D_chain f i = D_chain f (i + 1))
     (j : ℕ) : D_chain f (i + j) = D_chain f (i + j + 1) := by
@@ -64,14 +53,19 @@ section
 
 variable (f : G ≃+ G)
 
-theorem D_chain_bounded : ∃ i ≤ card G, D_chain f i = D_chain f (i + 1) := by
-  by_contra! h
-  linarith [
-    add_le_card_of_D_chain_adj_ne fun _ hi ↦ h _ (Nat.le_of_lt_succ hi)
-  ]
-
 theorem D_chain_bounded' : ∃ i, D_chain f i = D_chain f (i + 1) := by
-  rcases D_chain_bounded f with ⟨_, _, h⟩; exact ⟨_, h⟩
+  by_contra! h
+  replace h (i : ℕ) : ncard (D_chain f i : Set G) + i ≤ card G := by
+    induction' i with i ih
+    · dsimp [D_chain, D_chain']
+      rw [ncard_univ, Nat.card_eq_fintype_card]
+    trans ncard (D_chain f i : Set G) + i
+    · nth_rw 2 [add_comm i]; rw [← add_assoc, add_le_add_iff_right]
+      refine Nat.succ_le_of_lt <| ncard_lt_ncard ?_ <| toFinite _
+      apply lt_of_le_of_ne (D_chain_adj_le _ _)
+      exact (h i).symm
+    exact ih
+  linarith [h (card G + 1)]
 
 theorem D_chain_exists_unique_bound : ∃! i, isDChainBound f i := by
   rcases D_chain_bound_exists_of_bounded <| D_chain_bounded' f with ⟨_, hi⟩
@@ -88,6 +82,16 @@ theorem D_rank_is_bound : isDChainBound f <| D_rank f :=
 
 noncomputable def D_core : AddSubgroup G := D_chain f (D_rank f)
 
-instance : CloseF f (D_core f) := D_chain_CloseF _ (D_rank _)
+theorem D_core_le_chain (i : ℕ) : D_core f ≤ D_chain f i := by
+  induction' i with i ih
+  · exact le_top
+  by_cases h : i + 1 ≤ D_rank f
+  · exact D_chain_le_of_le _ h
+  push_neg at h
+  replace h : D_rank f ≤ i := Nat.le_of_lt_succ h
+  exact
+    le_of_eq <| (eq_of_le_of_le ih <| D_chain_le_of_le _ h).trans <|
+    Nat.add_sub_cancel' h ▸
+    D_chain_add_eq_of_eq (D_rank_is_bound _).succ (i - D_rank f)
 
 end

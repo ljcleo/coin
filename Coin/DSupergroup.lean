@@ -1,6 +1,6 @@
 import Coin.DSubgroup
 
-open AddSubgroup Set SetLike
+open Set
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
 variable (f : G ≃+ G)
@@ -22,7 +22,7 @@ def D_Supergroup : AddSubgroup G where
   zero_mem' :=
     ⟨mem_preimage.mpr <| (map_zero (D f)).symm ▸ K.zero_mem', H.zero_mem'⟩
 
-instance D_Supergroup_CloseF : CloseF f (D_Supergroup f H K) where
+instance : CloseF f (D_Supergroup f H K) where
   image_closed := by
     rintro _ ⟨hx, hx'⟩
     exact ⟨

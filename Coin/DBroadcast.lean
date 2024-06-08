@@ -1,13 +1,17 @@
 import Coin.DSupergroup
 
-open AddSubgroup Set SetLike
+open Set
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
 variable {f : G ≃+ G}
 variable {H : AddSubgroup G} [hCFH : CloseF f H]
 variable {K : AddSubgroup G}
 
-theorem succ_CloseD (hCD : CloseD f H K) :
+section
+
+variable (hCD : CloseD f H K)
+
+theorem succ_CloseD :
     CloseD f (D_Subgroup f H) (D_Subgroup f K) := ext fun _ ↦ by
   constructor
   · rintro ⟨⟨y, hy, hxy⟩, ⟨x, hx, rfl⟩⟩
@@ -29,7 +33,7 @@ theorem succ_CloseD (hCD : CloseD f H K) :
     ⟨x, mem_of_subset_of_mem (Subgroup_of_CloseD hCD) hx, rfl⟩
   ⟩
 
-theorem D_Subgroup_lt_of_lt_of_CloseD (hCD : CloseD f H K) (hKH : K < H) :
+theorem D_Subgroup_lt_of_lt_of_CloseD (hKH : K < H) :
     D_Subgroup f K < D_Subgroup f H := by
   apply lt_of_le_of_ne (D_Subgroup_le_of_le _ <| le_of_lt hKH)
   rcases exists_of_ssubset hKH with ⟨x, hx, hk⟩
@@ -39,7 +43,9 @@ theorem D_Subgroup_lt_of_lt_of_CloseD (hCD : CloseD f H K) (hKH : K < H) :
     mem_of_subset_of_mem (@D_Subgroup_le _ _ _ _ <| CloseF_of_CloseD hCD) <|
     hk ▸ ⟨x, hx, rfl⟩
 
-theorem prec_CloseD (hCD : CloseD f (D_Subgroup f H) K) :
+end
+
+theorem pred_CloseD (hCD : CloseD f (D_Subgroup f H) K) :
     CloseD f H (D_Supergroup f H K) := ext fun x ↦ by
   constructor
   · rintro ⟨⟨h, _⟩, h'⟩; exact ⟨preimage_close_of_CloseD hCD ⟨x, h', rfl⟩ h, h'⟩

@@ -1,8 +1,11 @@
 import Coin.CloseF
 
-open Set SetLike
+open Set
 
 variable {G : Type*} [Fintype G] [AddCommGroup G]
+
+section
+
 variable (f : G ≃+ G)
 
 def D : G →+ G := AddMonoidHom.mk'
@@ -11,10 +14,11 @@ def D : G →+ G := AddMonoidHom.mk'
 
 theorem D_f_comm (x : G) : D f (f x) = f (D f x) := by dsimp [D]; rw [map_sub]
 
-variable (H : AddSubgroup G) [hCF : CloseF f H]
-
-theorem D_maps_to_self_of_CloseF : MapsTo (D f) H H := fun _ hx ↦ by
+theorem D_maps_to_self_of_CloseF (H : AddSubgroup G) [hCF : CloseF f H] :
+    MapsTo (D f) H H := fun _ hx ↦ by
   dsimp [D]; refine sub_mem ?_ hx; exact hCF.image_closed hx
+
+end
 
 theorem D_bijOn_of_D_image_eq {f : G ≃+ G} {H : AddSubgroup G}
     (h : (D f) '' H = H) : BijOn (D f) H H :=
