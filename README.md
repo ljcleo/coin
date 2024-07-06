@@ -2,7 +2,6 @@
 
 An interesting question about finite communicative groups and group isomorphisms.
 
-
 ## Introduction
 
 Let $G=(0,+)$ be a finite communicative group, and $f$ be any group isomorphism on $G$. We define a two-player game between an attacker (Alice) and a defender (David):
@@ -19,3 +18,7 @@ The game is deterministic, so there must be a definite winner. This project aims
     Under what conditions can Alice the attacker win the game?
 
 We give three different conditions equivalent to Alice's victory. In the last section, we give a concrete example regarding coins on a circle ring.
+
+## File Structure
+
+![structure](img/coin.svg)
