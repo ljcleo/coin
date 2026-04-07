@@ -82,9 +82,10 @@ theorem coset_full_play_eq_hom_chain_full_play (x₀ : D_chain f i)
   · rw [chain_full_play, ← ih]
   rw [chain_full_play, ← ih]; apply congrArg (· + _)
   rw [
-    chain_quot_chain_hom, AddMonoidHom.mk'_apply, Subtype.mk.injEq,
-    chain_quot_hom, mk'_apply, mk'_apply, QuotientAddGroup.eq, coe_add, coe_add,
-    neg_add_rev, add_comm, ← add_assoc, add_neg_cancel_right, ← sub_eq_add_neg
+    map_add, map_add, add_right_cancel_iff, chain_quot_chain_hom, AddMonoidHom.codRestrict_apply,
+    AddMonoidHom.codRestrict_apply, Subtype.mk.injEq, AddMonoidHom.restrict_apply,
+    AddMonoidHom.restrict_apply, chain_quot_hom, mk'_apply, mk'_apply, QuotientAddGroup.eq,
+    ← sub_eq_neg_add
   ]
   exact f_pow_sub_mem_D_Subgroup x₀.prop _
 
@@ -163,7 +164,7 @@ theorem elim_list_rev_partial_can_shrink (𝒟 : List ℕ) :
       rw [coset_full_play_elim_list_rev_partial, symm_apply_apply, sub_self]
   rw [
     coset_full_play_eq_hom_chain_full_play _ _ 𝒟, chain_quot_chain_hom,
-    AddMonoidHom.mk'_apply, Subtype.mk.injEq
+    AddMonoidHom.codRestrict_apply, Subtype.mk.injEq
   ] at h
   rw [← eq_zero_iff]; convert h
 

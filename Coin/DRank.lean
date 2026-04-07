@@ -69,11 +69,7 @@ theorem D_chain_exists_unique_bound : ∃! i, isDChainBound f i := by
   rcases D_chain_bound_exists_of_bounded <| D_chain_bounded' f with ⟨_, hi⟩
   exact ExistsUnique.intro _ hi fun _ hj ↦ (D_chain_bound_unique hi hj).symm
 
-noncomputable def D_rank_unique : Unique { a // isDChainBound f a } :=
-  Classical.choice <| (unique_subtype_iff_exists_unique _).mpr <|
-  D_chain_exists_unique_bound _
-
-noncomputable def D_rank : ℕ := (D_rank_unique f).default
+noncomputable def D_rank : ℕ := (D_chain_exists_unique_bound f).choose
 
 theorem D_rank_is_bound : isDChainBound f <| D_rank f :=
-  (D_rank_unique _).toInhabited.default.property
+  (D_chain_exists_unique_bound f).choose_spec.1

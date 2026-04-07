@@ -12,8 +12,8 @@ variable (i : ℕ)
 def chain_quot_hom : G →+ G ⧸ D_chain f (i + 1) :=
   QuotientAddGroup.mk' (D_chain f (i + 1))
 
-def chain_quot : Set (G ⧸ D_chain f (i + 1)) :=
-  chain_quot_hom f i '' (D_chain f i : Set G)
+def chain_quot (f : G ≃+ G) (i : ℕ) : AddSubgroup (G ⧸ D_chain f (i + 1)) :=
+  (D_chain f i).map (chain_quot_hom f i)
 
 theorem chain_quot_card_eq_relindex :
     Nat.card (chain_quot f i) = (D_chain f (i + 1)).relindex (D_chain f i) :=
@@ -29,54 +29,20 @@ section
 variable {f : G ≃+ G}
 variable {i : ℕ}
 
-theorem exist_chain_quot_inv (a : chain_quot f i) :
-    ∃ x : D_chain f i, chain_quot_hom f i x.val = a.val := by
-  rcases a.prop with ⟨x, hx, h⟩; exact ⟨⟨x, hx⟩, h⟩
-
-instance : Add (chain_quot f i) where
-  add := fun a b ↦
-    ⟨
-      a.val + b.val,
-      by
-        rcases exist_chain_quot_inv a with ⟨x, hx⟩
-        rcases exist_chain_quot_inv b with ⟨y, hy⟩
-        exact ⟨x + y, add_mem x.prop y.prop, hx ▸ hy ▸ map_add _ _ _⟩
-    ⟩
-
-instance : Neg (chain_quot f i) where
-  neg := fun a ↦
-    ⟨
-      -a.val,
-      by
-        rcases exist_chain_quot_inv a with ⟨x, hx⟩
-        exact ⟨-x, neg_mem x.prop, hx ▸ map_neg _ _⟩
-    ⟩
-
-instance : Zero (chain_quot f i) where
-  zero := ⟨0, _, zero_mem _, map_zero _⟩
-
-instance : AddGroup (chain_quot f i) :=
-  AddGroup.ofLeftAxioms (fun _ _ _ ↦ by ext; exact add_assoc _ _ _)
-  (fun _ ↦ by ext; exact zero_add _) (fun _ ↦ by ext; exact add_left_neg _)
-
-def chain_quot_chain_hom : D_chain f i →+ chain_quot f i := AddMonoidHom.mk'
-  (fun x ↦ ⟨chain_quot_hom f i x.val, x.val, x.prop, rfl⟩)
-  (fun x y ↦ by ext; dsimp; rw [map_add]; rfl)
+def chain_quot_chain_hom : D_chain f i →+ chain_quot f i :=
+  ((chain_quot_hom f i).restrict <| D_chain f i).codRestrict _
+    fun x => AddSubgroup.mem_map.mpr ⟨x, x.prop, rfl⟩
 
 def lift_chain (x : D_chain f (i + 1)) : D_chain f i :=
   ⟨x.val, mem_of_subset_of_mem (D_chain_adj_le f _) x.prop⟩
 
 theorem hom_lift_chain_eq_zero (x : D_chain f (i + 1)) :
-    chain_quot_chain_hom (lift_chain x) = 0 := by
-  rw [
-    lift_chain, chain_quot_chain_hom, AddMonoidHom.mk'_apply, Subtype.mk.injEq,
-    chain_quot_hom, mk'_apply
-  ]
-  convert (eq_zero_iff _).mpr x.prop
+    chain_quot_chain_hom (lift_chain x) = 0 := Subtype.ext <| (eq_zero_iff _).mpr x.prop
 
 theorem chain_quot_chain_hom_surj :
-    Surjective (@chain_quot_chain_hom _ _ f i) := fun a ↦ by
-  rcases exist_chain_quot_inv a with ⟨x, hx⟩; use x; ext; exact hx
+    Surjective (@chain_quot_chain_hom _ _ f i) := fun ⟨_, h⟩ => by
+  obtain ⟨x, hx, h'⟩ := AddSubgroup.mem_map.mp h
+  exact ⟨⟨x, hx⟩, Subtype.ext h'⟩
 
 noncomputable def chain_quot_rep :
     chain_quot f i → D_chain f i := surjInv chain_quot_chain_hom_surj
